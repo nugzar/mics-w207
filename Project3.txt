@@ -1,0 +1,30 @@
+Re: project 3 and sparse matrices ...
+QUESTION:
+The notebook as provided mentions that the dataset is sparse, but there are not too many features, so we use a dense representation. I have researched this, and generally understand the difference between sparse and dense representations. My question on it is: are there any general guidelines for when we would use a sparse vs. a dense representation? Does it relate to computer memory and processing power, or is it primarily a matter of sparsity and number of features?
+RESPONSE:
+Conceptually, a matrix of values is a matrix of values whether few of the values are zeros or many of the values are zeros.  However, you can store the matrix of values in computer memory in various ways.  One way is to store explicitly the non-zero values and store only implicitly the zero values using some sort of coding scheme (e.g., rather than storing 1,000,000 zeros in a row, just store a 1 and a 1,000,000 to indicate that all values in positions 1 through 1,000,000 contain zeros).  We call such a way of storing a sparse matrix representation.  If your matrix is large and includes many zeros, then storing as a sparse matrix uses much less computer memory than other ways of storing.  Of course, any functions that take a sparse matrix object as an argument must be implemented in such a way that they can interpret the coding scheme.  Note, some functions are implemented in such a way that they actually work faster on sparse matrix objects.
+Re: project 3, part 1 ...
+QUESTION:
+My understanding was that we should run pca.fit_transform on the train data, since we are both reducing dimensionality and finding what weights to use for future dimensionality reduction. Just want to verify that, because, when I run the code with pca.fit(train_data) instead, I get the same answers for the fraction of the total variance in the  training data explained by the first "x" principal components. Also, in "real life" would it be best practice to normalize the data? We discussed this previously and the potential for using "StandardScalar" but what is the "best practice" answer?
+RESPONSE:
+PCA’s .fit method produces a weight matrix and (conveniently) an array of principal component variances, which you can get from the .explained_variance_ratio_ property.  In practice, it’s common to normalize data prior to converting it to principal component form if the features are recorded using different scales or different units.  For this exercise, though, all features are only zeros and ones, so they’re not different different scales or different units.
+Re: project 3, part 2 ...
+QUESTION:
+Instead of showing the positive examples in red and negative examples in green, I referenced back to the original train labels for 0 and 1 and found color that way. I was not sure what it meant by positive in red and negative in green and how to determine which were positive and which were negative, especially if PCA1 at a particular index i was negative, and PCA2 at a particular index i was positive. This leads me to believe I am missing something conceptual here.
+RESPONSE:
+Think of principal components as new features that you create.  Convert the entire training dataset (but not including the labels) to principal component format, i.e., create new features.  Plot the training data on a 2-D scatterplot, where one axis is the first principal component (a new feature you created) and the other axis is the second principal component (another new feature you created).  Color each observation you plot based on its label – note, the labels are never involved in the PCA.
+Re: project 3, part 4...
+QUESTION:
+Why do the contours look the way they do for different covariance types?
+RESPONSE:
+Think of a Gaussian mixture model as a contour or a landscape of mountains and valleys.  The number of GMM components indicates the number of mountain peaks.  The covariance matrix/matrices indicates how stretched and twisted the mountains are.  The covariance matrix type indicates the details about how the covariance matrix/matrices should be constructed.
+Re: project 3, part 5 ...
+QUESTION:
+My understanding of fit_transform vs transform is that we get the weights for use in fit_transform, so, when reducing dimensionality, we fit_transform our train data and we transform our test data.
+RESPONSE:
+Right.
+Re: project 3, part 6 ...
+QUESTION:
+I am quite happy with my program and how it runs, but also quite confident that i calculate the number of components for varying covariance types incorrectly.
+RESPONSE:
+Iterate through combinations that include all four covariance matrix types (one at a time), but calculate the number of parameters the same way for each type.  So, the calculation should include only number of PC’s, number of GMM components, and number of classes (which is always 2).
