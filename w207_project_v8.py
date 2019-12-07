@@ -12,12 +12,11 @@ from sklearn import metrics
 
 # Starting code here
 
-if len(sys.argv) != 3:
-    print("program csvfile numberofrows")
+if len(sys.argv) != 2:
+    print("program csvfile")
     exit()
 
 csvfilename = sys.argv[1]
-totalrows = int(sys.argv[2])
 
 datatypes = {
     'ProductName': np.int64,
@@ -119,21 +118,14 @@ datatypes = {
     'Census_OSVersion_4': np.int64
 }
 
-print ('Loading csv', file=open("w207_project_v7.log", "a"))
+print ('Loading csv', file=open("w207_project_v8.log", "a"))
 full_features = pd.read_csv(csvfilename, dtype=datatypes, index_col="MachineIdentifier")
+totalrows = len(full_features)
 
-# Shuffle the data
-#np.random.seed(0)
-
-print ('Shuffling', file=open("w207_project_v7.log", "a"))
-shuffle = np.random.permutation(np.arange(full_features.shape[0]))[:totalrows]
-indexes = full_features.index[shuffle]
-full_features = full_features.loc[indexes,:]
 full_labels = full_features["HasDetections"]
 full_features = full_features.drop(["HasDetections"], axis=1)
 
-print (full_features.shape, file=open("w207_project_v7.log", "a"))
-
+print (full_features.shape, file=open("w207_project_v8.log", "a"))
 
 train_count = int(totalrows * 0.8)
 
@@ -143,16 +135,16 @@ test_features  = full_features.values[train_count:]
 train_labels = full_labels.values[:train_count]
 test_labels = full_labels.values[train_count:]
 
-print (train_labels.shape, test_labels.shape, file=open("w207_project_v7.log", "a"))
+print (train_labels.shape, test_labels.shape, file=open("w207_project_v8.log", "a"))
 
 clf = ske.HistGradientBoostingClassifier(random_state=123)
 clf.fit(train_features, train_labels)
 all_columns_score = clf.score(test_features, test_labels)
-print ("All columns (original)", train_features.shape, "HistGradientBoostingClassifier", all_columns_score*100, file=open("w207_project_v7.log", "a"))
+print ("All columns (original)", train_features.shape, "HistGradientBoostingClassifier", all_columns_score*100, file=open("w207_project_v8.log", "a"))
 
 def optimize_score(all_features, labels, current_score, trn_count, tst_count, level, excluded_columns):
 
-    print ('Score for level', level, 'is', current_score*100, 'columns', all_features.columns, file=open("w207_project_v7.log", "a"))
+    print ('Score for level', level, 'is', current_score*100, 'columns', all_features.columns, file=open("w207_project_v8.log", "a"))
     processed_columns = []
 
     for c in all_features.columns:
@@ -175,7 +167,7 @@ def optimize_score(all_features, labels, current_score, trn_count, tst_count, le
         print ('Level', level,': Dropping', c,
                train_features.shape, test_features.shape, "HistGradientBoosting",
                current_score*100, score*100, score >= current_score, score > current_score,
-               file=open("w207_project_v7.log", "a"))
+               file=open("w207_project_v8.log", "a"))
 
         if score > current_score:
             optimize_score(df_features, labels, score, trn_count, tst_count, level + 1, processed_columns)
