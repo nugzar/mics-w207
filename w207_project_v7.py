@@ -150,16 +150,11 @@ clf.fit(train_features, train_labels)
 all_columns_score = clf.score(test_features, test_labels)
 print ("All columns (original)", train_features.shape, "HistGradientBoostingClassifier", all_columns_score*100, file=open("w207_project_v7.log", "a"))
 
-def optimize_score(all_features, labels, current_score, trn_count, tst_count, level, excluded_columns):
+def optimize_score(all_features, labels, current_score, trn_count, tst_count, level):
 
     print ('Score for level', level, 'is', current_score*100, 'columns', all_features.columns, file=open("w207_project_v7.log", "a"))
-    processed_columns = []
 
     for c in all_features.columns:
-        if c in excluded_columns:
-            continue
-
-        processed_columns.append(c)
         df_features = all_features.drop(c, axis=1)
 
         train_features = df_features.values[:trn_count]
@@ -178,8 +173,8 @@ def optimize_score(all_features, labels, current_score, trn_count, tst_count, le
                file=open("w207_project_v7.log", "a"))
 
         if score > current_score:
-            optimize_score(df_features, labels, score, trn_count, tst_count, level + 1, processed_columns)
+            optimize_score(df_features, labels, score, trn_count, tst_count, level + 1)
 
 # Let's try good old brute force ;)
-optimize_score(full_features, full_labels, all_columns_score, train_count, totalrows - train_count, 1, [])
+optimize_score(full_features, full_labels, all_columns_score, train_count, totalrows - train_count, 1)
 

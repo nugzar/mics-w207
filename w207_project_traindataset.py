@@ -12,11 +12,13 @@ from sklearn import metrics
 
 # Starting code here
 
-if len(sys.argv) != 2:
-    print("program csvfile")
+if len(sys.argv) != 4:
+    print("program incsvfile outcsvfile numberofrows")
     exit()
 
-csvfilename = sys.argv[1]
+incsvfilename = sys.argv[1]
+outcsvfilename = sys.argv[2]
+totalrows = int(sys.argv[3])
 
 datatypes = {
     'ProductName': np.int64,
@@ -118,61 +120,17 @@ datatypes = {
     'Census_OSVersion_4': np.int64
 }
 
-print ('Loading csv', file=open("w207_project_v8.log", "a"))
-full_features = pd.read_csv(csvfilename, dtype=datatypes, index_col="MachineIdentifier")
-totalrows = len(full_features)
+print ('Loading csv')
+full_features = pd.read_csv(incsvfilename, dtype=datatypes, index_col="MachineIdentifier")
 
-full_labels = full_features["HasDetections"]
-full_features = full_features.drop(["HasDetections"], axis=1)
+# Shuffle the data
+#np.random.seed(0)
 
-print (full_features.shape, file=open("w207_project_v8.log", "a"))
+print ('Shuffling')
+shuffle = np.random.permutation(np.arange(full_features.shape[0]))[:totalrows]
+indexes = full_features.index[shuffle]
+full_features = full_features.loc[indexes,:]
 
-train_count = int(totalrows * 0.8)
+print ('Saving', full_features.shape)
 
-train_features = full_features.values[:train_count]
-test_features  = full_features.values[train_count:]
-
-train_labels = full_labels.values[:train_count]
-test_labels = full_labels.values[train_count:]
-
-print (train_labels.shape, test_labels.shape, file=open("w207_project_v8.log", "a"))
-
-clf = ske.HistGradientBoostingClassifier(random_state=123)
-clf.fit(train_features, train_labels)
-all_columns_score = clf.score(test_features, test_labels)
-print ("All columns (original)", train_features.shape, "HistGradientBoostingClassifier", all_columns_score*100, file=open("w207_project_v8.log", "a"))
-
-def optimize_score(all_features, labels, current_score, trn_count, tst_count, level, excluded_columns):
-
-    print ('Score for level', level, 'is', current_score*100, 'columns', all_features.columns, file=open("w207_project_v8.log", "a"))
-    processed_columns = []
-    processed_columns.extend(excluded_columns)
-
-    for c in all_features.columns:
-        if c in processed_columns:
-            continue
-
-        processed_columns.append(c)
-        df_features = all_features.drop(c, axis=1)
-
-        train_features = df_features.values[:trn_count]
-        test_features  = df_features.values[trn_count:trn_count+tst_count]
-
-        train_labels = labels.values[:trn_count]
-        test_labels = labels.values[trn_count:trn_count+tst_count]
-
-        clf = ske.HistGradientBoostingClassifier(random_state=123)
-        clf.fit(train_features, train_labels)
-        score = clf.score(test_features, test_labels)
-
-        print ('Level', level,': Dropping', c,
-               train_features.shape, test_features.shape, "HistGradientBoosting",
-               current_score*100, score*100, score >= current_score, score > current_score,
-               file=open("w207_project_v8.log", "a"))
-
-        if score >= current_score:
-            optimize_score(df_features, labels, score, trn_count, tst_count, level + 1, processed_columns)
-
-# Let's try good old brute force ;)
-optimize_score(full_features, full_labels, all_columns_score, train_count, totalrows - train_count, 1, [])
-
+full_features.to_csv(outcsvfilename)
