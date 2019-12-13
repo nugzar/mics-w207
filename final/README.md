@@ -5,8 +5,7 @@ Download the following files from Nugzar’s github url https://github.com/nugza
 - w207_project.ipynb
 - bruteforced_engineered.csv
 
-Place the files in the same folder
-Run w207_project.ipynb
+Place the files in the same folder and run w207_project.ipynb
 
 
 # Full process
@@ -24,10 +23,10 @@ Run w207_project.ipynb
 The file bruteforced_engineered.csv will be generated. This file is used as an input for the file "w207_project.ipynb"
 
 **Step 5:** Optional - Run the file w207_project_bruteforce.py
-Run "w207_project_bruteforce.py regularized.csv". 
-
-This command will start bruteforcing the regularized.csv dataset. It will try dropping the columns one after another and finding the optimal columns. The process will be logged in w207_project_bruteforce.log file. The columns and the accuracy score will be logged to the file and when the process ends, it will be possible to select the best score and the list of columns to be used for getting that score
-
+Run "w207_project_bruteforce.py regularized.csv".  
+  
+This command will start bruteforcing the regularized.csv dataset. It will try dropping the columns one after another and finding the optimal columns. The process will be logged in w207_project_bruteforce.log file. The columns and the accuracy score will be logged to the file and when the process ends, it will be possible to select the best score and the list of columns to be used for getting that score  
+  
 These columns are already included in w207_project_data_engineering.ipynb file at the bottom for information purposes.
 
 **Step 6:** Run the file w207_project.ipynb
