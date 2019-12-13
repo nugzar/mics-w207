@@ -12,7 +12,6 @@ Run w207_project.ipynb
 # Full process
 **Step 1:** Download the following files from kaggle - https://www.kaggle.com/c/microsoft-malware-prediction/data
 - train.csv
-- test.csv
 
 **Step 2:** Download the following files from Nugzar’s github url https://github.com/nugzar/mics-w207/tree/master/final
 - w207_project_data_engineering.ipynb
