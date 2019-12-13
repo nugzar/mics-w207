@@ -10,8 +10,13 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn import metrics
 
-# Starting code here
+# This script is used to drob the columns that are causing overfitting
+# The nested function is dropping a column and id the precision improves
+# the function calls itself with the reduced number of columns to check
+# if the further dropping of some other columns will also positively
+# impacts the score.
 
+# The script takes 1 argument, and this argument is a path to the csv file
 if len(sys.argv) != 2:
     print("program csvfile")
     exit()
@@ -125,15 +130,19 @@ datatypes = {
     'HasDetections': np.int8
 }
 
+# Loading the csv file
 print ('Loading csv', file=open("w207_project_bruteforce.log", "a"))
 full_features = pd.read_csv(csvfilename, dtype=datatypes, index_col="MachineIdentifier")
 totalrows = len(full_features)
 
+# Ectracting label column from the recordset
 full_labels = full_features["HasDetections"]
 full_features = full_features.drop(["HasDetections"], axis=1)
 
+# Logging some technical details
 print (full_features.shape, file=open("w207_project_bruteforce.log", "a"))
 
+# Training recordset is 80% of the total data
 train_count = int(totalrows * 0.8)
 
 train_features = full_features.values[:train_count]
@@ -144,42 +153,66 @@ test_labels = full_labels.values[train_count:]
 
 print (train_labels.shape, test_labels.shape, file=open("w207_project_bruteforce.log", "a"))
 
+# Calculating original precision score using HistGradientBoostingClassifier
 clf = ske.HistGradientBoostingClassifier(random_state=123)
 clf.fit(train_features, train_labels)
 all_columns_score = clf.score(test_features, test_labels)
 print ("All columns (original)", train_features.shape, "HistGradientBoostingClassifier", all_columns_score*100, file=open("w207_project_bruteforce.log", "a"))
 
 def optimize_score(all_features, labels, current_score, trn_count, tst_count, level, excluded_columns):
-
+    # This is the main function that is calling itself when the precision increases
+    # all_features is the source recordset
+    # labels contains te labels for the data
+    # current_score is tha score that we need to improve
+    # trn_count size of the training recordset
+    # tst_count is the size of the test data
+    # level is the nesting level for the information purposes
+    # excluded_columns contain the list of columns that should be skipped for optimization purposes
+    
     print ('Score for level', level, 'is', current_score*100, 'columns', all_features.columns, file=open("w207_project_bruteforce.log", "a"))
+    
+    # Processed column list is the list that contains the columns that we already checked 
     processed_columns = []
+    # Marking columns that should be excluded as processed
     processed_columns.extend(excluded_columns)
 
+    # Looping through column names
     for c in all_features.columns:
         if c in processed_columns:
             continue
 
         processed_columns.append(c)
+        
+        # Dropping the column and generating a recordset without this column
         df_features = all_features.drop(c, axis=1)
 
+        # Splitting the recordset into training and testing data
         train_features = df_features.values[:trn_count]
         test_features  = df_features.values[trn_count:trn_count+tst_count]
 
+        # Splitting the labels into training and testing labels
         train_labels = labels.values[:trn_count]
         test_labels = labels.values[trn_count:trn_count+tst_count]
 
+        # Calculating the score for the recordset with dropped column
         clf = ske.HistGradientBoostingClassifier(random_state=123)
         clf.fit(train_features, train_labels)
         score = clf.score(test_features, test_labels)
 
+        # Logging the new score
         print ('Level', level,': Dropping', c,
                train_features.shape, test_features.shape, "HistGradientBoosting",
                current_score*100, score*100, score >= current_score, score > current_score,
                file=open("w207_project_bruteforce.log", "a"))
 
+        # If the score has improved or is the same, then the recordset either has the same score
+        # with less features or the precision score is imrpoved. Either way is more optimal
+        # Therefore we are keeping this structure and trying to optimize it even more
+        # Passing optimized recordset to the same function for further optimizations
         if score >= current_score:
             optimize_score(df_features, labels, score, trn_count, tst_count, level + 1, processed_columns)
 
 # Let's try good old brute force ;)
+# Starting the optimization with the original dataset
 optimize_score(full_features, full_labels, all_columns_score, train_count, totalrows - train_count, 1, [])
 
